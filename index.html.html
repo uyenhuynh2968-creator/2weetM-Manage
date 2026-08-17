@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<title>2weet Map — Quản lý</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF6EE;
+    --paper:#FFFFFF;
+    --ink:#2B2321;
+    --ink-soft:#7A6C60;
+    --primary:#D9608B;
+    --primary-dark:#C52F64;
+    --primary-soft:#F7E3EA;
+    --primary-pastel:#FAD2C8;
+    --accent:#E3A73B;
+    --accent-soft:#FBEDCB;
+    --sage:#5E7F58;
+    --sage-soft:#E4EEDE;
+    --line:#E9DFCE;
+    --danger:#C93B3B;
+    --radius:20px;
+    --shadow:0 14px 34px -16px rgba(43,35,33,.28);
+    --shadow-sm:0 4px 14px -6px rgba(43,35,33,.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{ font-family:'Fraunces',serif; font-weight:600; letter-spacing:-0.01em; }
+  #app{ max-width:1080px; margin:0 auto; padding:0 20px 100px; }
+  a{ color:inherit; }
+
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand .mark{
+    width:50px;height:50px; border-radius:24%;
+    background:var(--primary-pastel);
+    display:flex;align-items:center;justify-content:center; font-size:22px;
+    box-shadow:var(--shadow-sm); overflow:hidden; flex:none;
+  }
+  .brand h1{ font-size:26px; margin:0; line-height:1; }
+  .brand p{ margin:4px 0 0; font-size:13px; color:var(--ink-soft); font-style:italic; }
+
+  .btn{
+    font-family:inherit; font-size:14px; font-weight:600; border:none; border-radius:12px;
+    padding:12px 16px; cursor:pointer; transition:transform .12s ease, opacity .12s ease;
+    display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-dark); }
+  .btn-ghost{ background:var(--accent-soft); color:#7A5A16; }
+  .btn-ghost:hover{ opacity:.85; }
+  .btn-outline{ background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .btn-outline:hover{ border-color:var(--primary); color:var(--primary); }
+  .btn-sm{ padding:8px 12px; font-size:12.5px; border-radius:10px;}
+  select, input[type=text], input[type=email], input[type=password], input[type=tel], input[type=url], textarea{
+    font-family:inherit; font-size:14px; padding:11px 13px; border-radius:12px;
+    border:1px solid var(--line); background:#fff; color:var(--ink); outline:none;
+  }
+  select:focus, input:focus, textarea:focus{ border-color:var(--primary); }
+
+  .chip{
+    font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:999px;
+    border:1px solid var(--line); background:#fff; color:var(--ink-soft); cursor:pointer;
+    user-select:none;
+  }
+  .chip.on{ background:var(--sage-soft); border-color:var(--sage); color:var(--sage); }
+  .checkbox-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+
+  /* ---------- Login gate ---------- */
+  .gate-wrap{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .gate-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:36px 30px; max-width:360px; width:100%; text-align:center;
+  }
+  .gate-card .mark{ margin:0 auto 14px; }
+  .gate-card h2{ font-size:21px; margin:0 0 6px; }
+  .gate-card .sub{ font-size:13px; color:var(--ink-soft); margin-bottom:20px; }
+  .gate-card input{ width:100%; text-align:left; font-size:14px; margin-bottom:12px; }
+  .gate-card .btn{ width:100%; justify-content:center; margin-top:4px; }
+  .gate-error{ font-size:12.5px; color:var(--danger); margin-top:10px; min-height:16px; }
+  #adminApp{ display:none; }
+  #adminApp.open{ display:block; }
+  #gateScreen.hidden{ display:none; }
+
+  /* ---------- Admin ---------- */
+  .admin-header{ display:flex; justify-content:space-between; align-items:center; padding:26px 0 16px; border-bottom:1px solid var(--line); margin-bottom:20px;}
+  .admin-tabs{ display:flex; gap:8px; margin-bottom:20px; align-items:center; }
+  .admin-tab{ padding:9px 16px; border-radius:10px; font-size:13.5px; font-weight:600; background:#fff; border:1px solid var(--line); cursor:pointer; color:var(--ink-soft);}
+  .admin-tab.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
+  .admin-panel{ display:none; }
+  .admin-panel.active{ display:block; }
+  table.admin-table{ width:100%; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; box-shadow:var(--shadow-sm);}
+  table.admin-table th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); padding:10px 12px; background:var(--bg); border-bottom:1px solid var(--line);}
+  table.admin-table td{ padding:11px 12px; font-size:13px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.admin-table tr:last-child td{ border-bottom:none; }
+  .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .pill{ font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; text-transform:uppercase; }
+  .pill.pending{ background:var(--accent-soft); color:#8A6412; }
+  .pill.approved{ background:var(--sage-soft); color:var(--sage); }
+  .pill.rejected{ background:#F4E1DC; color:var(--danger); }
+  .admin-empty{ padding:40px; text-align:center; color:var(--ink-soft); background:#fff; border-radius:14px; border:1px dashed var(--line);}
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(43,35,33,.5); display:none;
+    align-items:flex-start; justify-content:center; z-index:100; padding:5vh 16px; overflow-y:auto;
+  }
+  .overlay.open{ display:flex; }
+  .modal{
+    background:var(--paper); border-radius:var(--radius); max-width:560px; width:100%;
+    padding:26px; box-shadow:var(--shadow); position:relative;
+  }
+  .modal h2{ margin:0 0 4px; font-size:22px; }
+  .modal .sub{ font-size:13px; color:var(--ink-soft); margin-bottom:18px;}
+  .modal-close{
+    position:absolute; top:18px; right:18px; background:none; border:none; font-size:20px;
+    cursor:pointer; color:var(--ink-soft); line-height:1;
+  }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-soft);}
+  .field input, .field select, .field textarea{ width:100%; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+  .img-upload-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .img-upload-hint{ font-size:11px; color:var(--ink-soft); }
+  .img-preview-strip{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .img-thumb{ position:relative; width:76px; height:76px; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:var(--bg); flex:none; }
+  .img-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .img-thumb .img-remove{
+    position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%;
+    background:rgba(43,35,33,.65); color:#fff; border:none; font-size:12px; line-height:1;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .modal-actions{ display:flex; gap:10px; margin-top:20px; }
+  .modal-actions .btn{ flex:1; justify-content:center; }
+  .req{ color:var(--danger); }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:#fff; padding:12px 20px; border-radius:999px; font-size:13.5px;
+    opacity:0; transition:all .25s ease; z-index:200; pointer-events:none;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:640px){
+    .field-row{ flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN GATE ============ -->
+<div class="gate-wrap" id="gateScreen">
+  <div class="gate-card">
+    <div class="mark">🛠️</div>
+    <h2>Khu vực quản lý</h2>
+    <div class="sub">Đăng nhập tài khoản Admin</div>
+    
+    <!-- Ô nhập Email -->
+    <input type="email" id="adminEmailInput" placeholder="Email Admin..." />
+    
+    <!-- Ô nhập Mật khẩu -->
+    <input type="password" id="adminPasswordInput" placeholder="Mật khẩu..." onkeydown="if(event.key==='Enter')checkPin()" />
+    
+    <button class="btn btn-primary" id="pinSubmitBtn" onclick="checkPin()">Đăng nhập</button>
+    <div class="gate-error" id="gateError"></div>
+  </div>
+</div>
+
+<!-- ============ ADMIN APP ============ -->
+<div id="adminApp">
+  <div id="app">
+    <div class="admin-header">
+      <div class="brand">
+        <div class="mark">🛠️</div>
+        <div>
+          <h1 style="font-size:22px;">Trang quản lý</h1>
+          <p>Duyệt đề xuất &amp; quản lý danh sách tiệm bánh</p>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="logoutAdmin()">🔒 Đăng xuất</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="pending" onclick="switchAdminTab('pending')">⏳ Chờ duyệt <span id="pendingCountTab"></span></button>
+      <button class="admin-tab" data-tab="all" onclick="switchAdminTab('all')">📋 Tất cả tiệm</button>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="openStoreForm(null)">+ Thêm tiệm mới</button>
+    </div>
+
+    <div class="admin-panel active" id="panel-pending"></div>
+    <div class="admin-panel" id="panel-all"></div>
+  </div>
+</div>
+
+<!-- Store form modal (admin add/edit) -->
+<div class="overlay" id="storeFormOverlay">
+  <div class="modal" style="max-width:600px;">
+    <button class="modal-close" onclick="closeOverlay('storeFormOverlay')">✕</button>
+    <h2 id="storeFormTitle">Thêm tiệm mới</h2>
+    <div class="sub">Điền đầy đủ thông tin — tiệm sẽ hiện ngay cho khách khi lưu.</div>
+    <form id="storeForm" onsubmit="return saveStoreForm(event)"></form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDKs (Đã thêm thư viện Auth) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ================= FIREBASE CONFIG ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAT53_QnjyersQ9W7dfbO6VoH85v8RrraE",
+  authDomain: "weet-map.firebaseapp.com",
+  databaseURL: "https://weet-map-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "weet-map",
+  storageBucket: "weet-map.firebasestorage.app",
+  messagingSenderId: "720330436107",
+  appId: "1:720330436107:web:80c486f0fd39d34cb3610e",
+  measurementId: "G-5J6S50EQ32"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const storesRef = db.ref('stores_data');
+
+/* ================= CONSTANTS ================= */
+const FORMATS = ['Physical','Online','Hybrid'];
+const CATEGORIES = ['Bánh kem & Gato','Bánh lạnh & Desserts','Bánh Tart & Pie','Bánh Pastry & Croissant','Bánh mì & Bánh nướng','Bánh Quy & Dry Cakes','Bánh Việt & Truyền thống','Tráng miệng Mặn'];
+const DIETS = ['Lactose-free','Gluten-free','Nut-free','Vegan','Sugar-free / Low-sugar','Organic'];
+const SEED = [{
+  id:'seed-vagabond', name:'The Vagabond Pâtisserie & Café',
+  address:'9 Trần Cao Vân, Phường Sài Gòn, Quận 1, TP. Hồ Chí Minh',
+  format:'Hybrid', hours:'08:00 - 22:00', contact:'0931 224 334',
+  website:'https://thevagabondpatisserie.com/',
+  categories:['Bánh lạnh & Desserts','Bánh Tart & Pie','Bánh Pastry & Croissant'],
+  diets:['Organic'],
+  highlights:'Petit Four, Entremets, Tart trái cây, Éclair, Tiramisu, Mille-feuille',
+  review:'First choice của Lavender',
+  lat:10.7826, lng:106.7004, status:'approved', createdAt: Date.now()
+}];
+
+/* ================= STATE ================= */
+let stores = [];
+let currentAdminTab = 'pending';
+let modalOpenCount = 0;
+
+/* ================= STORAGE (Firebase Realtime Database) ================= */
+function toStoreMap(storeList){
+  return (storeList || []).reduce((map, item) => {
+    if (item && item.id) map[item.id] = item;
+    return map;
+  }, {});
+}
+
+async function persistStores(){
+  try{
+    await storesRef.set(toStoreMap(stores));
+  }
+  catch(e){ console.error('Lỗi lưu dữ liệu', e); showToast('⚠️ Không lưu được dữ liệu, thử lại sau.'); }
+}
+
+/* ================= LOGIN GATE ================= */
+async function checkPin() {
+  const errEl = document.getElementById('gateError');
+  const email = document.getElementById('adminEmailInput').value.trim();
+  const password = document.getElementById('adminPasswordInput').value.trim();
+
+  if (!email || !password) {
+    errEl.textContent = 'Vui lòng nhập đầy đủ Email và Mật khẩu!';
+    return;
+  }
+
+  errEl.textContent = 'Đang xác thực...';
+
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+    errEl.textContent = '';
+    document.getElementById('gateScreen').classList.add('hidden');
+    document.getElementById('adminApp').classList.add('open');
+    if (typeof bootAdmin === 'function') bootAdmin();
+  } catch (error) {
+    console.error("Lỗi đăng nhập:", error);
+    errEl.textContent = 'Email hoặc Mật khẩu không chính xác!';
+  }
+}
+
+function logoutAdmin() {
+  firebase.auth().signOut().then(() => {
+    document.getElementById('adminApp').classList.remove('open');
+    document.getElementById('gateScreen').classList.remove('hidden');
+    document.getElementById('adminEmailInput').value = '';
+    document.getElementById('adminPasswordInput').value = '';
+    document.getElementById('gateError').textContent = '';
+  });
+}
+
+/* ================= BOOT ================= */
+let firebaseSyncStarted = false;
+function bootAdmin(){
+  if(firebaseSyncStarted) return;
+  firebaseSyncStarted = true;
+  storesRef.on('value', snap=>{
+    const val = snap.val();
+    if(val){
+      stores = Array.isArray(val) ? val : Object.values(val);
+    } else {
+      stores = SEED.slice();
+      persistStores();
+    }
+    renderAdmin();
+  }, err=>{
+    console.error('Lỗi đồng bộ dữ liệu', err);
+    showToast('⚠️ Không kết nối được cơ sở dữ liệu.');
+  });
+}
+
+function switchAdminTab(tab){
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.getElementById('panel-pending').classList.toggle('active', tab==='pending');
+  document.getElementById('panel-all').classList.toggle('active', tab==='all');
+}
+
+function renderAdmin(){
+  const pending = stores.filter(s=>s.status==='pending');
+  document.getElementById('pendingCountTab').textContent = pending.length ? `(${pending.length})` : '';
+
+  const pendingPanel = document.getElementById('panel-pending');
+  pendingPanel.innerHTML = pending.length ? `
+    <table class="admin-table">
+      <thead><tr><th>Tiệm</th><th>Địa chỉ</th><th>Dòng bánh / Chế độ ăn</th><th>Hành động</th></tr></thead>
+      <tbody>
+        ${pending.map(s=>`
+          <tr>
+            <td><b>${escapeHtml(s.name)}</b><br><span style="color:var(--ink-soft)">${escapeHtml(s.contact||'')}</span></td>
+            <td>${escapeHtml(s.address||'')}</td>
+            <td>${(s.categories||[]).concat(s.diets||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</td>
+            <td class="row-actions">
+              <button class="btn btn-primary btn-sm" onclick="setStatus('${s.id}','approved')">✓ Duyệt</button>
+              <button class="btn btn-outline btn-sm" onclick="openStoreForm('${s.id}')">✎ Sửa</button>
+              <button class="btn btn-outline btn-sm" onclick="setStatus('${s.id}','rejected')">✕ Từ chối</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  ` : `<div class="admin-empty">Không có đề xuất nào đang chờ duyệt 🎉</div>`;
+
+  const allPanel = document.getElementById('panel-all');
+  allPanel.innerHTML = stores.length ? `
+    <table class="admin-table">
+      <thead><tr><th>Tiệm</th><th>Trạng thái</th><th>Khoảng cách gốc (lat,lng)</th><th>Hành động</th></tr></thead>
+      <tbody>
+        ${stores.slice().sort((a,b)=>b.createdAt-a.createdAt).map(s=>`
+          <tr>
+            <td><b>${escapeHtml(s.name)}</b><br><span style="color:var(--ink-soft)">${escapeHtml(s.address||'')}</span></td>
+            <td><span class="pill ${s.status}">${s.status==='approved'?'Đã duyệt':s.status==='pending'?'Chờ duyệt':'Từ chối'}</span></td>
+            <td>${s.lat!=null? `${s.lat.toFixed(4)}, ${s.lng.toFixed(4)}` : '<span style="color:var(--ink-soft)">chưa có</span>'}</td>
+            <td class="row-actions">
+              <button class="btn btn-outline btn-sm" onclick="openStoreForm('${s.id}')">✎ Sửa</button>
+              ${s.status!=='approved'?`<button class="btn btn-primary btn-sm" onclick="setStatus('${s.id}','approved')">✓ Duyệt</button>`:''}
+              <button class="btn btn-outline btn-sm" onclick="deleteStore('${s.id}')" style="color:var(--danger);">🗑 Xoá</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  ` : `<div class="admin-empty">Chưa có tiệm nào. Bấm "+ Thêm tiệm mới" để bắt đầu.</div>`;
+}
+
+async function setStatus(id,status){
+  const s = stores.find(x=>x.id===id); if(!s) return;
+  s.status = status;
+  await persistStores();
+  renderAdmin();
+  showToast(status==='approved'? '✓ Đã duyệt — tiệm sẽ hiện cho khách ngay.' : 'Đã cập nhật trạng thái.');
+}
+async function deleteStore(id){
+  if(!confirm('Xoá tiệm này khỏi danh sách?')) return;
+  stores = stores.filter(x=>x.id!==id);
+  await persistStores();
+  renderAdmin();
+  showToast('Đã xoá tiệm.');
+}
+
+function fieldsHtml(prefix){
+  return `
+    <div class="field"><label>Tên tiệm <span class="req">*</span></label><input required type="text" id="${prefix}Name" placeholder="VD: Bánh Việt Cô Ba" /></div>
+    <div class="field"><label>Địa chỉ <span class="req">*</span></label><input required type="text" id="${prefix}Address" placeholder="Số nhà, đường, quận, thành phố" /></div>
+    <div class="field-row">
+      <div class="field"><label>Hình thức</label>
+        <select id="${prefix}Format">${FORMATS.map(f=>`<option value="${f}">${f}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Giờ mở cửa</label><input type="text" id="${prefix}Hours" placeholder="08:00 - 20:00" /></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Liên hệ</label><input type="text" id="${prefix}Contact" placeholder="09xx xxx xxx" /></div>
+      <div class="field"><label>Website / Fanpage</label><input type="text" id="${prefix}Website" placeholder="https://…" /></div>
+    </div>
+    <div class="field"><label>Dòng bánh</label><div class="checkbox-grid">${CATEGORIES.map(c=>chipInput(prefix+'Cat',c)).join('')}</div></div>
+    <div class="field"><label>Chế độ ăn</label><div class="checkbox-grid">${DIETS.map(d=>chipInput(prefix+'Diet',d)).join('')}</div></div>
+    <div class="field">
+      <label>Ảnh tiệm (gallery)</label>
+      <div class="img-upload-row">
+        <input type="file" id="${prefix}ImgFile" accept="image/*" multiple style="display:none" onchange="handleImageUpload(event,'${prefix}')" />
+        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('${prefix}ImgFile').click()">📷 Tải ảnh lên</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="promptAddImageUrl('${prefix}')">🔗 Dán link ảnh</button>
+        <span class="img-upload-hint">tối đa 10 ảnh</span>
+      </div>
+      <div class="img-preview-strip" id="${prefix}ImgPreview"></div>
+    </div>
+    <div class="field"><label>Món nổi bật</label><input type="text" id="${prefix}Highlights" placeholder="Croissant, Tiramisu, Tart trái cây…" /></div>
+    <div class="field"><label>Góc review / Ghi chú</label><textarea id="${prefix}Review" rows="2" placeholder="Ví dụ: First choice của mình vì..."></textarea></div>
+  `;
+}
+
+const imgStore = {};
+function initImageStore(prefix, existing){
+  imgStore[prefix] = (existing||[]).slice(0,10);
+  renderImagePreview(prefix);
+}
+function renderImagePreview(prefix){
+  const wrap = document.getElementById(prefix+'ImgPreview');
+  if(!wrap) return;
+  const list = imgStore[prefix]||[];
+  wrap.innerHTML = list.map((url,i)=>`
+    <div class="img-thumb">
+      <img src="${escapeAttr(url)}" alt="ảnh tiệm" />
+      <button type="button" class="img-remove" onclick="removeImage('${prefix}',${i})" title="Xoá ảnh">✕</button>
+    </div>`).join('');
+}
+function removeImage(prefix,i){
+  imgStore[prefix].splice(i,1);
+  renderImagePreview(prefix);
+}
+function promptAddImageUrl(prefix){
+  const url = prompt('Dán link ảnh (có thể dán nhiều link, cách nhau bằng dấu phẩy):');
+  if(!url) return;
+  const urls = url.split(',').map(s=>s.trim()).filter(Boolean);
+  imgStore[prefix] = (imgStore[prefix]||[]).concat(urls).slice(0,10);
+  renderImagePreview(prefix);
+}
+function resizeImageFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = ()=>{
+        const maxDim = 640;
+        let w = img.width, h = img.height;
+        if(w>maxDim || h>maxDim){
+          if(w>h){ h = Math.round(h*maxDim/w); w = maxDim; }
+          else { w = Math.round(w*maxDim/h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', 0.68));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function handleImageUpload(e, prefix){
+  const files = Array.from(e.target.files||[]);
+  if(!files.length) return;
+  const room = 10 - (imgStore[prefix]||[]).length;
+  if(room<=0){ showToast('Đã đủ 10 ảnh, xoá bớt để thêm ảnh mới.'); e.target.value=''; return; }
+  const toProcess = files.slice(0, room);
+  showToast('Đang xử lý ảnh…');
+  try{
+    const resized = await Promise.all(toProcess.map(resizeImageFile));
+    imgStore[prefix] = (imgStore[prefix]||[]).concat(resized).slice(0,10);
+    renderImagePreview(prefix);
+    showToast(`✓ Đã thêm ${resized.length} ảnh.`);
+  }catch(err){
+    showToast('Có lỗi khi xử lý ảnh, thử lại nhé.');
+  }
+  e.target.value = '';
+}
+
+function chipInput(name,val){
+  return `<button type="button" class="chip" data-group="${name}" data-value="${escapeAttr(val)}" onclick="this.classList.toggle('on')">${escapeHtml(val)}</button>`;
+}
+function collectChips(name){
+  return Array.from(document.querySelectorAll(`.chip[data-group="${name}"].on`)).map(b=>b.dataset.value);
+}
+
+function openStoreForm(id){
+  const s = id ? stores.find(x=>x.id===id) : null;
+  document.getElementById('storeFormTitle').textContent = s ? 'Sửa thông tin tiệm' : 'Thêm tiệm mới';
+  document.getElementById('storeForm').innerHTML = fieldsHtml('adm') + `
+    <div class="field-row">
+      <div class="field"><label>Vĩ độ (lat)</label><input type="text" id="admLat" placeholder="10.7826" /></div>
+      <div class="field"><label>Kinh độ (lng)</label><input type="text" id="admLng" placeholder="106.7004" /></div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm" style="margin:-6px 0 14px;" onclick="geocodeAddress()">🔍 Tự động lấy toạ độ từ địa chỉ</button>
+    <div class="field"><label>Trạng thái</label>
+      <select id="admStatus">
+        <option value="approved">Đã duyệt</option>
+        <option value="pending">Chờ duyệt</option>
+        <option value="rejected">Từ chối</option>
+      </select>
+    </div>
+    <input type="hidden" id="admId" value="${s? s.id : ''}" />
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" onclick="closeOverlay('storeFormOverlay')">Huỷ</button>
+      <button type="submit" class="btn btn-primary">Lưu tiệm</button>
+    </div>
+  `;
+  initImageStore('adm', s ? s.images : []);
+  if(s){
+    document.getElementById('admName').value = s.name||'';
+    document.getElementById('admAddress').value = s.address||'';
+    document.getElementById('admFormat').value = s.format||'Physical';
+    document.getElementById('admHours').value = s.hours||'';
+    document.getElementById('admContact').value = s.contact||'';
+    document.getElementById('admWebsite').value = s.website||'';
+    document.getElementById('admHighlights').value = s.highlights||'';
+    document.getElementById('admReview').value = s.review||'';
+    document.getElementById('admLat').value = s.lat!=null? s.lat : '';
+    document.getElementById('admLng').value = s.lng!=null? s.lng : '';
+    document.getElementById('admStatus').value = s.status||'approved';
+    (s.categories||[]).forEach(c=>{
+      const b = document.querySelector(`.chip[data-group="admCat"][data-value="${cssEscape(c)}"]`); if(b) b.classList.add('on');
+    });
+    (s.diets||[]).forEach(d=>{
+      const b = document.querySelector(`.chip[data-group="admDiet"][data-value="${cssEscape(d)}"]`); if(b) b.classList.add('on');
+    });
+  }
+  openOverlay('storeFormOverlay');
+}
+async function saveStoreForm(e){
+  e.preventDefault();
+  const id = document.getElementById('admId').value;
+  const name = document.getElementById('admName').value.trim();
+  const address = document.getElementById('admAddress').value.trim();
+  if(!name || !address){ showToast('Vui lòng nhập tên và địa chỉ.'); return false; }
+  const latVal = document.getElementById('admLat').value.trim();
+  const lngVal = document.getElementById('admLng').value.trim();
+  const data = {
+    name, address,
+    format: document.getElementById('admFormat').value,
+    hours: document.getElementById('admHours').value.trim(),
+    contact: document.getElementById('admContact').value.trim(),
+    website: document.getElementById('admWebsite').value.trim(),
+    categories: collectChips('admCat'),
+    diets: collectChips('admDiet'),
+    images: (imgStore['adm']||[]).slice(0,10),
+    highlights: document.getElementById('admHighlights').value.trim(),
+    review: document.getElementById('admReview').value.trim(),
+    lat: latVal? parseFloat(latVal): null,
+    lng: lngVal? parseFloat(lngVal): null,
+    status: document.getElementById('admStatus').value,
+  };
+  if(id){
+    const s = stores.find(x=>x.id===id);
+    Object.assign(s, data);
+  } else {
+    stores.push(Object.assign({id:'s-'+Date.now()+'-'+Math.random().toString(36).slice(2,7), createdAt:Date.now()}, data));
+  }
+  await persistStores();
+  closeOverlay('storeFormOverlay');
+  renderAdmin();
+  showToast('✓ Đã lưu tiệm.');
+  return false;
+}
+
+async function geocodeAddress(){
+  const addr = (document.getElementById('admAddress').value||'').trim();
+  if(!addr){ showToast('Nhập địa chỉ trước đã nhé.'); return; }
+  showToast('Đang tìm toạ độ…');
+  try{
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=vn&q=${encodeURIComponent(addr)}`;
+    const res = await fetch(url, { headers: { 'Accept':'application/json' } });
+    const data = await res.json();
+    if(data && data[0]){
+      document.getElementById('admLat').value = parseFloat(data[0].lat).toFixed(6);
+      document.getElementById('admLng').value = parseFloat(data[0].lon).toFixed(6);
+      showToast('📍 Đã tìm thấy toạ độ, kiểm tra lại trước khi lưu nhé.');
+    } else {
+      showToast('Không tìm thấy toạ độ cho địa chỉ này, nhập tay giúp mình.');
+    }
+  }catch(e){
+    showToast('Lỗi khi tìm toạ độ, thử lại sau.');
+  }
+}
+
+/* ================= UTIL ================= */
+function openOverlay(id){ document.getElementById(id).classList.add('open'); modalOpenCount++; }
+function closeOverlay(id){ document.getElementById(id).classList.remove('open'); modalOpenCount = Math.max(0,modalOpenCount-1); }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+function escapeHtml(str){ return (str||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeAttr(str){ return escapeHtml(str); }
+function cssEscape(str){ return (str||'').replace(/"/g,'\\"'); }
+
+// Tự động focus ô nhập Email khi tải trang
+document.getElementById('adminEmailInput').focus();
+</script>
+</body>
+</html>
